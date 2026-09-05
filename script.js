@@ -1,6 +1,14 @@
 const KEY='workdeskFinalV2';
 const fresh=()=>({user:null,tasks:[],reminders:[],notes:[],notifications:[],activity:[],settings:{theme:'light',notifications:true,sound:true,dateFormat:'DD/MM/YYYY',timeFormat:'12'},privateUnlocked:false});
 let data=load(),page='overview',cal=new Date(),timer;
+const $=id=>document.getElementById(id);
+const authScreen=$('authScreen'),welcomeScreen=$('welcomeScreen'),appScreen=$('appScreen');
+const loginForm=$('loginForm'),registerForm=$('registerForm');
+const loginUser=$('loginUser'),loginPassword=$('loginPassword');
+const regUser=$('regUser'),regPassword=$('regPassword'),regConfirm=$('regConfirm');
+const loginError=$('loginError'),registerError=$('registerError');
+const logoutBtn=$('logout'),themeBtn=$('theme'),bellBtn=$('bell'),profileBtn=$('profile');
+const searchBox=$('search'),resultsBox=$('results'),content=$('content'),pageTitle=$('pageTitle');
 function load(){try{return Object.assign(fresh(),JSON.parse(localStorage.getItem(KEY)||'{}'))}catch{return fresh()}}
 function save(){data.privateUnlocked=false;localStorage.setItem(KEY,JSON.stringify(data))}
 function id(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
@@ -8,17 +16,17 @@ function esc(x=''){return String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt
 function date(x){return x?new Date(x+'T00:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):''}
 function dt(x){return new Date(x).toLocaleString('en-IN',{dateStyle:'medium',timeStyle:data.settings.timeFormat==='24'?'short':'short'})}
 function today(){return new Date().toISOString().slice(0,10)}
-function toast(x){let t=document.getElementById('toast');t.textContent=x;t.className='toast show';setTimeout(()=>t.className='toast',2200)}
+function toast(x){let t=$('toast');t.textContent=x;t.className='toast show';setTimeout(()=>t.className='toast',2200)}
 function notify(title,body){data.notifications.unshift({id:id(),title,body,time:new Date().toISOString(),read:false});data.notifications=data.notifications.slice(0,100)}
 function activity(x){data.activity.unshift({text:x,time:new Date().toISOString()});data.activity=data.activity.slice(0,20)}
 function unread(){return data.notifications.filter(x=>!x.read).length}
-function top(){document.getElementById('profile').textContent=data.user?.username||'';document.getElementById('count').textContent=unread();document.getElementById('count').style.display=unread()?'block':'none';document.getElementById('theme').textContent=data.settings.theme==='dark'?'☀':'☾';document.body.classList.toggle('dark',data.settings.theme==='dark')}
+function top(){$('profile').textContent=data.user?.username||'';$('count').textContent=unread();$('count').style.display=unread()?'block':'none';$('theme').textContent=data.settings.theme==='dark'?'☀':'☾';document.body.classList.toggle('dark',data.settings.theme==='dark')}
 function screen(n){['authScreen','welcomeScreen','appScreen'].forEach(x=>document.getElementById(x).classList.toggle('hidden',x!==n))}
-function welcome(){document.getElementById('welcomeText').textContent='Welcome, '+data.user.username;screen('welcomeScreen');setTimeout(()=>{screen('appScreen');startTimer();go(page)},1700)}
-function go(p){page=p;document.querySelectorAll('.nav').forEach(b=>b.classList.toggle('active',b.dataset.page===p));document.getElementById('pageTitle').textContent={overview:'Overview',tasks:'Tasks',private:'Private Tasks',reminders:'Task Reminder',notifications:'Notifications',notes:'Notes',calendar:'Calendar',settings:'Settings'}[p];render()}
-function render(){top();({overview:overview,tasks:tasks,private:privatePage,reminders:reminders,notifications:notifications,notes:notes,calendar:calendarPage,settings:settings}[page])(document.getElementById('content'))}
-function modal(title,body){document.getElementById('modal').innerHTML='<div class="modal-bg" id="mb"><div class="modal-box"><h3>'+title+'</h3>'+body+'</div></div>'}
-function closeModal(){document.getElementById('modal').innerHTML=''}
+function welcome(){$('welcomeText').textContent='Welcome, '+data.user.username;screen('welcomeScreen');setTimeout(()=>{screen('appScreen');startTimer();go(page)},1700)}
+function go(p){page=p;document.querySelectorAll('.nav').forEach(b=>b.classList.toggle('active',b.dataset.page===p));pageTitle.textContent={overview:'Overview',tasks:'Tasks',private:'Private Tasks',reminders:'Task Reminder',notifications:'Notifications',notes:'Notes',calendar:'Calendar',settings:'Settings'}[p];render()}
+function render(){top();({overview:overview,tasks:tasks,private:privatePage,reminders:reminders,notifications:notifications,notes:notes,calendar:calendarPage,settings:settings}[page])(content)}
+function modal(title,body){$('modal').innerHTML='<div class="modal-bg" id="mb"><div class="modal-box"><h3>'+title+'</h3>'+body+'</div></div>'}
+function closeModal(){$('modal').innerHTML=''}
 function taskHTML(a,compact=false){return a.map(t=>`<div class="task ${t.done?'done':''}"><input type="checkbox" ${t.done?'checked':''} onchange="toggleTask('${t.id}')"><div><div class="title">${esc(t.title)}</div><div class="muted">${esc(t.description||'')}</div><div class="meta"><span class="pill ${t.priority}">${esc(t.priority)}</span>${t.category?`<span class="pill">${esc(t.category)}</span>`:''}${t.due?`<span class="pill">Due ${date(t.due)}</span>`:''}${t.private?'<span class="pill">🔒 Private</span>':''}</div></div>${compact?'':'<div class="task-actions"><button onclick="editTask(\''+t.id+'\')">Edit</button><button onclick="deleteTask(\''+t.id+'\')">Delete</button></div>'}</div>`).join('')}
 function overview(c){let p=data.tasks.filter(t=>!t.private&&!t.done).length,d=data.tasks.filter(t=>!t.private&&t.done).length,r=data.reminders.filter(x=>new Date(x.when)>=new Date()).length;c.innerHTML=`<div class="grid stats"><div class="card stat"><span>Pending Tasks</span><strong>${p}</strong></div><div class="card stat"><span>Completed Tasks</span><strong>${d}</strong></div><div class="card stat"><span>Upcoming Reminders</span><strong>${r}</strong></div><div class="card stat"><span>Unread Notifications</span><strong>${unread()}</strong></div></div><div class="grid two" style="margin-top:17px"><section class="panel"><h3>Today's Tasks</h3>${taskHTML(data.tasks.filter(t=>!t.private&&t.due===today()),true)||'<div class="muted">No tasks for today.</div>'}</section><section class="panel"><h3>Recent Activity</h3>${data.activity.slice(0,7).map(a=>`<p class="muted">${esc(a.text)}<br><small>${dt(a.time)}</small></p>`).join('')||'<div class="muted">No recent activity.</div>'}</section></div>`}
 function tasks(c){c.innerHTML=`<div class="toolbar"><div><button class="primary" onclick="openTask()">+ New Task</button> <input id="tq" placeholder="Search tasks..." oninput="filterTasks()"><select id="ts" onchange="filterTasks()"><option value="all">All status</option><option value="pending">Pending</option><option value="done">Completed</option></select></div></div><div id="taskList" class="task-list"></div>`;filterTasks()}
@@ -49,13 +57,30 @@ function saveProfile(){data.user.username=pn.value.trim()||data.user.username;da
 function savePin(){if(!/^\d{4,12}$/.test(pp.value)){toast('PIN must be 4-12 digits');return}data.user.pin=pp.value;save();toast('Private PIN saved')}
 function changePass(){if(newpass.value.length<4){toast('Password must be at least 4 characters');return}data.user.password=newpass.value;save();toast('Password changed')}
 function toggleTheme(){data.settings.theme=data.settings.theme==='dark'?'light':'dark';save();render()}
-function searchAll(){let q=search.value.trim().toLowerCase();if(!q){results.classList.add('hidden');return}let a=[];data.tasks.filter(t=>!t.private).forEach(t=>{if((t.title+' '+t.description).toLowerCase().includes(q))a.push(['Task',t.title,t.due?'Due '+date(t.due):''])});data.notes.filter(n=>!n.private).forEach(n=>{if((n.title+' '+n.body).toLowerCase().includes(q))a.push(['Note',n.title,n.body.slice(0,70)])});data.reminders.filter(r=>!r.private).forEach(r=>{if(r.title.toLowerCase().includes(q))a.push(['Reminder',r.title,dt(r.when)])});results.innerHTML=a.slice(0,12).map(x=>`<div class="result"><strong>${esc(x[1])}</strong><small>${x[0]} · ${esc(x[2])}</small></div>`).join('')||'<div class="result"><small>No matching WorkDesk items.</small></div>';results.classList.remove('hidden')}
+function searchAll(){let q=searchBox.value.trim().toLowerCase();if(!q){resultsBox.classList.add('hidden');return}let a=[];data.tasks.filter(t=>!t.private).forEach(t=>{if((t.title+' '+t.description).toLowerCase().includes(q))a.push(['Task',t.title,t.due?'Due '+date(t.due):''])});data.notes.filter(n=>!n.private).forEach(n=>{if((n.title+' '+n.body).toLowerCase().includes(q))a.push(['Note',n.title,n.body.slice(0,70)])});data.reminders.filter(r=>!r.private).forEach(r=>{if(r.title.toLowerCase().includes(q))a.push(['Reminder',r.title,dt(r.when)])});resultsBox.innerHTML=a.slice(0,12).map(x=>`<div class="result"><strong>${esc(x[1])}</strong><small>${x[0]} · ${esc(x[2])}</small></div>`).join('')||'<div class="result"><small>No matching WorkDesk items.</small></div>';resultsBox.classList.remove('hidden')}
 document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');loginForm.classList.toggle('hidden',b.dataset.auth!=='login');registerForm.classList.toggle('hidden',b.dataset.auth!=='register')});
 document.querySelectorAll('.show').forEach(b=>b.onclick=()=>{let i=document.getElementById(b.dataset.target);i.type=i.type==='password'?'text':'password';b.textContent=i.type==='password'?'Show':'Hide'});
-loginForm.onsubmit=e=>{e.preventDefault();if(!data.user||loginUser.value.trim()!==data.user.username||loginPassword.value!==data.user.password){loginError.textContent='Incorrect User ID or password.';return}welcome()};
-registerForm.onsubmit=e=>{e.preventDefault();if(regUser.value.trim().length<3){registerError.textContent='Username must be at least 3 characters.';return}if(regPassword.value.length<4){registerError.textContent='Password must be at least 4 characters.';return}if(regPassword.value!==regConfirm.value){registerError.textContent='Passwords do not match.';return}data.user={username:regUser.value.trim(),password:regPassword.value,pin:null};save();loginUser.value=data.user.username;registerError.textContent='';document.querySelector('[data-auth="login"]').click();toast('Account created')};
+loginForm.onsubmit=e=>{e.preventDefault();loginError.textContent='';
+  const username=loginUser.value.trim(),password=loginPassword.value;
+  if(!data.user||username!==data.user.username||password!==data.user.password){
+    loginError.textContent='Incorrect User ID or password.'; return;
+  }
+  welcome();
+};
+registerForm.onsubmit=e=>{e.preventDefault();registerError.textContent='';
+  const username=regUser.value.trim(),password=regPassword.value,confirm=regConfirm.value;
+  if(username.length<3){registerError.textContent='Username must be at least 3 characters.';return}
+  if(password.length<4){registerError.textContent='Password must be at least 4 characters.';return}
+  if(password!==confirm){registerError.textContent='Passwords do not match.';return}
+  data.user={username,password,pin:null,email:'',bio:''};
+  save();
+  loginUser.value=username;
+  loginPassword.value='';
+  document.querySelector('[data-auth="login"]').click();
+  toast('Account created successfully. Please login.');
+};
 document.querySelectorAll('.nav').forEach(b=>b.onclick=()=>go(b.dataset.page));
-logout.onclick=()=>{data.privateUnlocked=false;save();screen('authScreen');toast('Logged out')};
-theme.onclick=toggleTheme;bell.onclick=()=>go('notifications');profile.onclick=()=>go('settings');search.oninput=searchAll;document.addEventListener('click',e=>{if(!e.target.closest('.search'))results.classList.add('hidden')});
+logoutBtn.onclick=()=>{data.privateUnlocked=false;save();screen('authScreen');toast('Logged out')};
+themeBtn.onclick=toggleTheme;bellBtn.onclick=()=>go('notifications');profileBtn.onclick=()=>go('settings');searchBox.oninput=searchAll;document.addEventListener('click',e=>{if(!e.target.closest('.search'))resultsBox.classList.add('hidden')});
 window.openTask=openTask;window.toggleTask=toggleTask;window.editTask=editTask;window.deleteTask=deleteTask;window.unlock=unlock;window.lockPrivate=lockPrivate;window.openReminder=openReminder;window.editReminder=editReminder;window.deleteReminder=deleteReminder;window.readAll=readAll;window.openNote=openNote;window.editNote=editNote;window.deleteNote=deleteNote;window.moveMonth=moveMonth;window.saveProfile=saveProfile;window.savePin=savePin;window.changePass=changePass;window.toggleTheme=toggleTheme;
-if(data.user)welcome();else screen('authScreen');
+screen('authScreen');
