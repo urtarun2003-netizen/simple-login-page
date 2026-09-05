@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WorkDesk</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- AUTH SCREEN -->
+  <section id="authScreen" class="screen auth-screen active">
+    <div class="auth-shell">
+      <div class="brand-panel">
+        <div class="brand-mark">W</div>
+        <h1>WorkDesk</h1>
+        <p>Your professional workspace for tasks, reminders, notes, notifications and planning.</p>
+        <div class="brand-points">
+          <span>✓ Task Management</span>
+          <span>✓ Smart Reminders</span>
+          <span>✓ Notes & Calendar</span>
+          <span>✓ Light & Dark Mode</span>
+        </div>
+      </div>
+
+      <div class="auth-card">
+        <div class="auth-tabs">
+          <button id="showLoginBtn" class="auth-tab active" type="button">Login</button>
+          <button id="showRegisterBtn" class="auth-tab" type="button">Create Account</button>
+        </div>
+
+        <form id="loginForm" class="auth-form active">
+          <h2>Welcome back</h2>
+          <p class="muted">Login to continue to your WorkDesk dashboard.</p>
+
+          <label for="loginUsername">User ID</label>
+          <input id="loginUsername" type="text" autocomplete="username" placeholder="Enter your user ID" required />
+
+          <label for="loginPassword">Password</label>
+          <div class="password-wrap">
+            <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Enter your password" required />
+            <button class="icon-btn password-toggle" type="button" data-target="loginPassword">Show</button>
+          </div>
+
+          <button class="primary-btn full-btn" type="submit">Login</button>
+          <p id="loginError" class="form-error"></p>
+        </form>
+
+        <form id="registerForm" class="auth-form">
+          <h2>Create Account</h2>
+          <p class="muted">Create a local account to start using WorkDesk.</p>
+
+          <label for="registerUsername">User ID</label>
+          <input id="registerUsername" type="text" autocomplete="username" placeholder="Choose a user ID" required />
+
+          <label for="registerPassword">Password</label>
+          <div class="password-wrap">
+            <input id="registerPassword" type="password" autocomplete="new-password" placeholder="Create a password" required />
+            <button class="icon-btn password-toggle" type="button" data-target="registerPassword">Show</button>
+          </div>
+
+          <label for="confirmPassword">Confirm Password</label>
+          <div class="password-wrap">
+            <input id="confirmPassword" type="password" autocomplete="new-password" placeholder="Confirm your password" required />
+            <button class="icon-btn password-toggle" type="button" data-target="confirmPassword">Show</button>
+          </div>
+
+          <button class="primary-btn full-btn" type="submit">Create Account</button>
+          <p id="registerError" class="form-error"></p>
+        </form>
+
+        <p class="auth-note">Demo version: data is stored only in this browser using localStorage.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- WELCOME SCREEN -->
+  <section id="welcomeScreen" class="screen welcome-screen">
+    <div class="welcome-card">
+      <div class="welcome-logo">W</div>
+      <h2 id="welcomeTitle">Welcome</h2>
+      <p>Preparing your workspace...</p>
+      <div class="loading-line"><span></span></div>
+    </div>
+  </section>
+
+  <!-- MAIN APP -->
+  <section id="appScreen" class="screen app-screen">
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-brand">
+        <div class="small-logo">W</div>
+        <div>
+          <strong>WorkDesk</strong>
+          <small>Professional Workspace</small>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-btn active" data-page="dashboardPage">🏠 <span>Overview</span></button>
+        <button class="nav-btn" data-page="tasksPage">✅ <span>Tasks</span></button>
+        <button class="nav-btn" data-page="remindersPage">⏰ <span>Task Reminder</span></button>
+        <button class="nav-btn" data-page="notificationsPage">🔔 <span>Notifications</span></button>
+        <button class="nav-btn" data-page="notesPage">📝 <span>Notes</span></button>
+        <button class="nav-btn" data-page="calendarPage">📅 <span>Calendar</span></button>
+        <button class="nav-btn" data-page="settingsPage">⚙️ <span>Settings</span></button>
+      </nav>
+
+      <button id="sidebarLogoutBtn" class="logout-btn">↪ Logout</button>
+    </aside>
+
+    <div class="main-area">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button id="menuBtn" class="icon-btn menu-btn" type="button">☰</button>
+          <div>
+            <h1 id="pageHeading">Overview</h1>
+            <p id="todayLabel" class="muted"></p>
+          </div>
+        </div>
+
+        <div class="topbar-actions">
+          <button id="notificationShortcut" class="top-icon-btn" title="Notifications">
+            🔔
+            <span id="topUnreadCount" class="badge">0</span>
+          </button>
+          <button id="themeToggleBtn" class="top-icon-btn" title="Toggle theme">🌙</button>
+          <div class="user-chip">
+            <span class="avatar" id="topAvatar">U</span>
+            <div>
+              <strong id="topUsername">User</strong>
+              <small>WorkDesk User</small>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="content">
+        <!-- DASHBOARD -->
+        <section id="dashboardPage" class="page active">
+          <div class="page-header">
+            <div>
+              <h2>Overview</h2>
+              <p class="muted">A quick view of your current workspace.</p>
+            </div>
+            <button id="dashboardAddTaskBtn" class="primary-btn">+ New Task</button>
+          </div>
+
+          <div class="stats-grid">
+            <article class="stat-card">
+              <div class="stat-icon">📌</div>
+              <div>
+                <span>Pending Tasks</span>
+                <strong id="pendingStat">0</strong>
+              </div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-icon">✅</div>
+              <div>
+                <span>Completed Tasks</span>
+                <strong id="completedStat">0</strong>
+              </div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-icon">⏰</div>
+              <div>
+                <span>Upcoming Reminders</span>
+                <strong id="reminderStat">0</strong>
+              </div>
+            </article>
+            <article class="stat-card">
+              <div class="stat-icon">🔔</div>
+              <div>
+                <span>Unread Notifications</span>
+                <strong id="notificationStat">0</strong>
+              </div>
+            </article>
+          </div>
+
+          <div class="dashboard-grid">
+            <article class="panel">
+              <div class="panel-head">
+                <h3>Upcoming Tasks</h3>
+                <button class="text-btn" data-go="tasksPage">View all</button>
+              </div>
+              <div id="dashboardTaskList" class="list-stack"></div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-head">
+                <h3>Upcoming Reminders</h3>
+                <button class="text-btn" data-go="remindersPage">View all</button>
+              </div>
+              <div id="dashboardReminderList" class="list-stack"></div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-head">
+                <h3>Recent Notes</h3>
+                <button class="text-btn" data-go="notesPage">View all</button>
+              </div>
+              <div id="dashboardNoteList" class="list-stack"></div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-head">
+                <h3>Recent Activity</h3>
+              </div>
+              <div id="dashboardActivityList" class="list-stack"></div>
+            </article>
+          </div>
+        </section>
+
+        <!-- TASKS -->
+        <section id="tasksPage" class="page">
+          <div class="page-header">
+            <div>
+              <h2>Tasks</h2>
+              <p class="muted">Create, manage and complete your work items.</p>
+            </div>
+            <button id="addTaskBtn" class="primary-btn">+ New Task</button>
+          </div>
+
+          <div class="toolbar">
+            <input id="taskSearch" type="search" placeholder="Search tasks..." />
+            <select id="taskStatusFilter">
+              <option value="all">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="completed">Completed</option>
+            </select>
+            <select id="taskPriorityFilter">
+              <option value="all">All Priority</option>
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
+
+          <div id="taskList" class="task-list"></div>
+        </section>
+
+        <!-- REMINDERS -->
+        <section id="remindersPage" class="page">
+          <div class="page-header">
+            <div>
+              <h2>Task Reminder</h2>
+              <p class="muted">Schedule alerts for tasks or important work.</p>
+            </div>
+            <button id="addReminderBtn" class="primary-btn">+ New Reminder</button>
+          </div>
+
+          <div id="reminderList" class="reminder-grid"></div>
+        </section>
+
+        <!-- NOTIFICATIONS -->
+        <section id="notificationsPage" class="page">
+          <div class="page-header">
+            <div>
+              <h2>Notifications</h2>
+              <p class="muted">Review alerts, reminders and system updates.</p>
+            </div>
+            <button id="markAllReadBtn" class="secondary-btn">Mark all as read</button>
+          </div>
+
+          <div id="notificationList" class="notification-list"></div>
+        </section>
+
+        <!-- NOTES -->
+        <section id="notesPage" class="page">
+          <div class="page-header">
+            <div>
+              <h2>Notes</h2>
+              <p class="muted">Store quick notes, work updates and references.</p>
+            </div>
+            <button id="addNoteBtn" class="primary-btn">+ New Note</button>
+          </div>
+
+          <div class="toolbar">
+            <input id="noteSearch" type="search" placeholder="Search notes..." />
+          </div>
+
+          <div id="notesGrid" class="notes-grid"></div>
+        </section>
+
+        <!-- CALENDAR -->
+        <section id="calendarPage" class="page">
+          <div class="page-header calendar-header">
+            <div>
+              <h2>Calendar</h2>
+              <p class="muted">View tasks and reminders by date.</p>
+            </div>
+
+            <div class="calendar-controls">
+              <button id="prevMonthBtn" class="secondary-btn">‹</button>
+              <button id="todayBtn" class="secondary-btn">Today</button>
+              <select id="calendarMonth"></select>
+              <select id="calendarYear"></select>
+              <button id="nextMonthBtn" class="secondary-btn">›</button>
+            </div>
+          </div>
+
+          <div class="calendar-card">
+            <div class="calendar-weekdays">
+              <span>Sun</span>
+              <span>Mon</span>
+              <span>Tue</span>
+              <span>Wed</span>
+              <span>Thu</span>
+              <span>Fri</span>
+              <span>Sat</span>
+            </div>
+            <div id="calendarGrid" class="calendar-grid"></div>
+          </div>
+        </section>
+
+        <!-- SETTINGS -->
+        <section id="settingsPage" class="page">
+          <div class="page-header">
+            <div>
+              <h2>Settings</h2>
+              <p class="muted">Manage profile, appearance, notifications and security.</p>
+            </div>
+          </div>
+
+          <div class="settings-grid">
+            <article class="settings-card">
+              <h3>User Profile</h3>
+              <label>User ID</label>
+              <input id="settingsUsername" type="text" disabled />
+              <p class="setting-help">Your local WorkDesk user ID.</p>
+            </article>
+
+            <article class="settings-card">
+              <h3>Appearance</h3>
+              <div class="setting-row">
+                <div>
+                  <strong>Dark Mode</strong>
+                  <p>Switch between light and dark appearance.</p>
+                </div>
+                <label class="switch">
+                  <input id="darkModeSwitch" type="checkbox" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </article>
+
+            <article class="settings-card">
+              <h3>Notification Settings</h3>
+              <div class="setting-row">
+                <div>
+                  <strong>In-app Notifications</strong>
+                  <p>Show reminder notifications inside WorkDesk.</p>
+                </div>
+                <label class="switch">
+                  <input id="notificationSwitch" type="checkbox" checked />
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="setting-row">
+                <div>
+                  <strong>Reminder Sound</strong>
+                  <p>Play a short sound when a reminder is triggered.</p>
+                </div>
+                <label class="switch">
+                  <input id="soundSwitch" type="checkbox" checked />
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </article>
+
+            <article class="settings-card">
+              <h3>General</h3>
+              <label for="dateFormatSelect">Date Format</label>
+              <select id="dateFormatSelect">
+                <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+              </select>
+
+              <label for="timeFormatSelect">Time Format</label>
+              <select id="timeFormatSelect">
+                <option value="12">12 Hour</option>
+                <option value="24">24 Hour</option>
+              </select>
+            </article>
+
+            <article class="settings-card danger-card">
+              <h3>Security</h3>
+
+              <label for="currentPassword">Current Password</label>
+              <input id="currentPassword" type="password" placeholder="Current password" />
+
+              <label for="newPassword">New Password</label>
+              <input id="newPassword" type="password" placeholder="New password" />
+
+              <button id="changePasswordBtn" class="secondary-btn">Change Password</button>
+              <button id="settingsLogoutBtn" class="danger-btn">Logout</button>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+  </section>
+
+  <!-- TASK MODAL -->
+  <div id="taskModal" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="taskModalTitle">New Task</h3>
+        <button class="icon-btn close-modal" data-close="taskModal">✕</button>
+      </div>
+
+      <form id="taskForm">
+        <input id="taskId" type="hidden" />
+
+        <label for="taskTitle">Task Title</label>
+        <input id="taskTitle" type="text" placeholder="Enter task title" required />
+
+        <label for="taskDescription">Description</label>
+        <textarea id="taskDescription" rows="4" placeholder="Add task details"></textarea>
+
+        <div class="form-row">
+          <div>
+            <label for="taskDate">Due Date</label>
+            <input id="taskDate" type="date" required />
+          </div>
+          <div>
+            <label for="taskPriority">Priority</label>
+            <select id="taskPriority">
+              <option value="High">High</option>
+              <option value="Medium" selected>Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="secondary-btn close-modal" data-close="taskModal" type="button">Cancel</button>
+          <button class="primary-btn" type="submit">Save Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- REMINDER MODAL -->
+  <div id="reminderModal" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="reminderModalTitle">New Reminder</h3>
+        <button class="icon-btn close-modal" data-close="reminderModal">✕</button>
+      </div>
+
+      <form id="reminderForm">
+        <input id="reminderId" type="hidden" />
+
+        <label for="reminderTitle">Reminder Title</label>
+        <input id="reminderTitle" type="text" placeholder="Enter reminder title" required />
+
+        <label for="reminderTask">Related Task (optional)</label>
+        <select id="reminderTask">
+          <option value="">No related task</option>
+        </select>
+
+        <div class="form-row">
+          <div>
+            <label for="reminderDate">Date</label>
+            <input id="reminderDate" type="date" required />
+          </div>
+          <div>
+            <label for="reminderTime">Time</label>
+            <input id="reminderTime" type="time" required />
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="secondary-btn close-modal" data-close="reminderModal" type="button">Cancel</button>
+          <button class="primary-btn" type="submit">Save Reminder</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- NOTE MODAL -->
+  <div id="noteModal" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="noteModalTitle">New Note</h3>
+        <button class="icon-btn close-modal" data-close="noteModal">✕</button>
+      </div>
+
+      <form id="noteForm">
+        <input id="noteId" type="hidden" />
+
+        <label for="noteTitle">Title</label>
+        <input id="noteTitle" type="text" placeholder="Note title" required />
+
+        <label for="noteBody">Note</label>
+        <textarea id="noteBody" rows="8" placeholder="Write your note here..." required></textarea>
+
+        <div class="modal-actions">
+          <button class="secondary-btn close-modal" data-close="noteModal" type="button">Cancel</button>
+          <button class="primary-btn" type="submit">Save Note</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
