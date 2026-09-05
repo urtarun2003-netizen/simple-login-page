@@ -1,16 +1,19 @@
-WorkDesk Professional Dashboard
+WorkDesk Final
+General-purpose productivity website for all users.
 
-Files:
-- index.html
-- style.css
-- script.js
+Included:
+- Login/Create Account
+- General profile (no employee fields)
+- Tasks and task-name search
+- Private Tasks protected by PIN
+- Private tasks hidden from dashboard, normal task list, calendar and global search while locked
+- Private reminders with generic notification text
+- Notes, including private notes
+- Reminders with in-app notification and sound
+- Notifications
+- Full month calendar (2020-2050)
+- Light/Dark mode
+- Settings
 
-How to run:
-1. Extract the ZIP.
-2. Open index.html in Chrome, Edge, Firefox, or another modern browser.
-3. Create an account.
-4. Login and use the dashboard.
-
-Important:
-This demo stores the account, tasks, reminders, notes and settings in browser localStorage.
-For a real public application, connect it to a secure backend such as Supabase and never store plain passwords in localStorage.
+Important security note:
+This browser version uses localStorage. It is suitable for a demo/personal prototype, not high-security production use. For a public production service, use secure backend authentication, server-side authorization and a database. Do not store production passwords in localStorage.
